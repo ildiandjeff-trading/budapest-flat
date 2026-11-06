@@ -1,103 +1,122 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Skyline from "@/components/Skyline";
 
-export default function Home() {
+const TITLE = "Our Budapest Flat";
+
+export default function Intro() {
+  const router = useRouter();
+  const [leaving, setLeaving] = useState(false);
+  const [stars, setStars] = useState<{ x: number; y: number; s: number; d: number }[]>([]);
+
+  useEffect(() => {
+    setStars(Array.from({ length: 60 }, () => ({ x: Math.random() * 100, y: Math.random() * 60, s: Math.random() * 1.8 + 0.4, d: Math.random() * 4 })));
+    router.prefetch("/calendar");
+  }, [router]);
+
+  const words = useMemo(() => TITLE.split(" "), []);
+
+  const enter = () => {
+    setLeaving(true);
+    setTimeout(() => router.push("/calendar"), 650);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <main className="fixed inset-0 overflow-hidden bg-[#0b0d1a] text-white">
+      {/* gradient glow */}
+      <motion.div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(120% 80% at 50% 110%, #3b2a5a 0%, #1a1b3a 40%, #0b0d1a 75%)" }}
+        animate={{ opacity: [0.8, 1, 0.8] }}
+        transition={{ duration: 8, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute left-1/2 top-[62%] h-[50vmax] w-[50vmax] -translate-x-1/2 rounded-full blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(255,176,138,.28), transparent 60%)" }}
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 2.5, ease: "easeOut" }}
+      />
+      {stars.map((st, i) => (
+        <motion.span
+          key={i}
+          className="absolute rounded-full bg-white"
+          style={{ left: `${st.x}%`, top: `${st.y}%`, width: st.s, height: st.s }}
+          animate={{ opacity: [0.1, 0.9, 0.1] }}
+          transition={{ duration: 3 + st.d, repeat: Infinity, delay: st.d }}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      ))}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <AnimatePresence>
+        {!leaving && (
+          <motion.div
+            key="content"
+            className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+            exit={{ opacity: 0, scale: 1.06, filter: "blur(8px)" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            <motion.p
+              className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-white/60"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              Szia · Welcome
+            </motion.p>
+
+            <h1 className="font-display text-5xl font-semibold leading-[1.05] sm:text-7xl">
+              {words.map((w, wi) => (
+                <span key={wi} className="inline-block whitespace-nowrap">
+                  {w.split("").map((ch, ci) => (
+                    <motion.span
+                      key={ci}
+                      className="inline-block"
+                      initial={{ opacity: 0, y: 30, rotateX: -60 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                      transition={{ delay: 0.5 + (wi * 5 + ci) * 0.045, type: "spring", stiffness: 140, damping: 14 }}
+                    >
+                      {ch}
+                    </motion.span>
+                  ))}
+                  {wi < words.length - 1 && <span>&nbsp;</span>}
+                </span>
+              ))}
+            </h1>
+
+            <motion.p
+              className="mt-5 max-w-sm text-base text-white/70"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6, duration: 1 }}
+            >
+              Who&apos;s staying when, and everything you need for a lovely stay by the Danube.
+            </motion.p>
+
+            <Skyline className="mt-10 w-full max-w-xl" />
+
+            <motion.button
+              onClick={enter}
+              className="group relative mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full bg-white px-7 py-3.5 font-semibold text-[#0b0d1a] shadow-[0_10px_40px_-10px_rgba(255,176,138,.7)]"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.4, type: "spring", stiffness: 120 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              <span className="relative z-10">Come on in</span>
+              <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <motion.span
+                className="absolute inset-y-0 -left-1/2 w-1/2 bg-gradient-to-r from-transparent via-[#ffd27a]/60 to-transparent"
+                animate={{ x: ["0%", "400%"] }}
+                transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.5, delay: 3 }}
+              />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
   );
 }

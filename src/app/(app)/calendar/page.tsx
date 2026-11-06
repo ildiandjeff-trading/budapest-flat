@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import MonthCalendar from "@/components/MonthCalendar";
 import StayDialog from "@/components/StayDialog";
-import { GlanceCard, UpcomingList } from "@/components/Glance";
+import { BastionCard, UpcomingList } from "@/components/Glance";
 import { useAuth, useStays } from "@/lib/data";
 import { STAY_COLORS, type Stay } from "@/lib/types";
 import { toKey } from "@/lib/dates";
@@ -50,7 +50,7 @@ export default function CalendarPage() {
           {loading ? <div className="card skeleton h-[560px]" /> : <MonthCalendar stays={stays} onDayClick={newStay} onStayClick={openStay} />}
         </div>
         <div className="order-1 space-y-5 lg:order-2">
-          <GlanceCard stays={stays} />
+          <BastionCard />
           <div className="hidden lg:block"><UpcomingList stays={stays} onSelect={openStay} /></div>
         </div>
         <div className="order-3 lg:hidden"><UpcomingList stays={stays} onSelect={openStay} /></div>

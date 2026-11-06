@@ -1,58 +1,27 @@
 "use client";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { motion } from "framer-motion";
-import { Home, Moon, Sparkles } from "lucide-react";
 import type { Stay } from "@/lib/types";
+import Bastion from "@/components/Bastion";
 import { isActive, nights, rangeLabel, toKey } from "@/lib/dates";
 
-export function GlanceCard({ stays }: { stays: Stay[] }) {
-  const today = new Date();
-  const now = stays.find((s) => isActive(s, today));
-  const next = stays.find((s) => s.start_date > toKey(today));
-
-  let title: string, sub: string, Icon = Home, tone = "from-[#24477f] to-[#3a6cc4]";
-  if (now) {
-    const left = differenceInCalendarDays(parseISO(now.end_date), today);
-    title = `${now.guest_name} ${now.guests > 1 ? "are" : "is"} staying`;
-    sub = `Checking out ${format(parseISO(now.end_date), "EEE d MMM")} · ${left === 1 ? "tomorrow" : `in ${left} days`}`;
-    tone = "from-navy to-navy-2";
-  } else if (next) {
-    const inD = differenceInCalendarDays(parseISO(next.start_date), today);
-    title = "The flat is free right now";
-    sub = `Next up: ${next.guest_name} ${inD === 1 ? "tomorrow" : `in ${inD} days`}`;
-    Icon = Moon;
-  } else {
-    title = "No stays planned";
-    sub = "Tap a day on the calendar to add one.";
-    Icon = Sparkles;
-  }
-
+export function BastionCard() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
       whileHover={{ y: -3 }}
-      className={`relative overflow-hidden rounded-[1.25rem] bg-gradient-to-br ${tone} p-5 text-white shadow-xl shadow-navy/25`}
+      className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-b from-[#132650] via-navy to-navy-2 px-3 pb-2 pt-5 shadow-xl shadow-navy/25"
     >
-      <motion.div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" animate={{ scale: [1, 1.18, 1], rotate: [0, 30, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
-      <motion.div className="absolute -bottom-16 -left-8 h-36 w-36 rounded-full bg-[#6f97e0]/30 blur-2xl" animate={{ x: [0, 30, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
+      <motion.div className="absolute -bottom-16 -left-8 h-36 w-36 rounded-full bg-[#6f97e0]/30 blur-2xl" animate={{ x: [0, 40, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
+      <motion.div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-[#6f97e0]/15 blur-2xl" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
       <motion.div
         aria-hidden
-        className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent"
+        className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent"
         animate={{ x: ["0%", "450%"] }}
-        transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 4, ease: "easeInOut", delay: 1 }}
+        transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 6, ease: "easeInOut", delay: 4 }}
       />
-      <div className="relative">
-        <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white/80">
-          <motion.span className="relative flex h-2 w-2">
-            <motion.span className="absolute inline-flex h-full w-full rounded-full bg-gold" animate={{ scale: [1, 2.4], opacity: [0.8, 0] }} transition={{ duration: 1.8, repeat: Infinity }} />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
-          </motion.span>
-          <Icon className="h-4 w-4" /> Right now
-        </div>
-        <motion.p key={title} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="font-display text-2xl font-semibold leading-tight">{title}</motion.p>
-        <motion.p key={sub} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-1 text-sm text-white/85">{sub}</motion.p>
-      </div>
+      <Bastion className="relative w-full" />
     </motion.div>
   );
 }

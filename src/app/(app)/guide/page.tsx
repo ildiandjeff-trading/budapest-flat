@@ -43,13 +43,13 @@ export default function GuidePage() {
 
   return (
     <>
-      <div className="relative mb-8 overflow-hidden rounded-[1.5rem] bg-[#141a33] px-6 py-10 text-white sm:px-10 sm:py-14">
-        <motion.div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-accent/40 blur-3xl" animate={{ x: [0, -20, 0], y: [0, 15, 0] }} transition={{ duration: 10, repeat: Infinity }} />
-        <motion.div className="absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-danube/40 blur-3xl" animate={{ x: [0, 25, 0] }} transition={{ duration: 12, repeat: Infinity }} />
+      <div className="relative mb-8 overflow-hidden rounded-[1.5rem] border border-line bg-gradient-to-br from-[#fdf6ec] via-[#fbe6d6] to-[#f3cfc0] px-6 py-10 text-ink sm:px-10 sm:py-14">
+        <motion.div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-accent/25 blur-3xl" animate={{ x: [0, -20, 0], y: [0, 15, 0] }} transition={{ duration: 10, repeat: Infinity }} />
+        <motion.div className="absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-gold/30 blur-3xl" animate={{ x: [0, 25, 0] }} transition={{ duration: 12, repeat: Infinity }} />
         <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Guest guide</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-ink/50">Guest guide</p>
           <h1 className="mt-2 font-display text-4xl font-semibold sm:text-5xl">Make yourself at home</h1>
-          <p className="mt-3 max-w-lg text-white/75">Everything you need for your stay: getting in, Wi-Fi, how things work, and our favourite spots nearby.</p>
+          <p className="mt-3 max-w-lg text-ink/70">Everything you need for your stay: getting in, Wi-Fi, how things work, and our favourite spots nearby.</p>
         </div>
       </div>
 

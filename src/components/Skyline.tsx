@@ -21,7 +21,7 @@ export default function Skyline({ className = "" }: { className?: string }) {
           key={i}
           d={d}
           stroke="url(#sky)"
-          strokeWidth={1.6}
+          strokeWidth={1.8}
           strokeLinecap="round"
           strokeLinejoin="round"
           initial={{ pathLength: 0, opacity: 0 }}
@@ -33,7 +33,7 @@ export default function Skyline({ className = "" }: { className?: string }) {
         <motion.path
           key={`w${i}`}
           d={`M0 ${106 + i * 5} Q55 ${103 + i * 5} 110 ${106 + i * 5} T220 ${106 + i * 5} T330 ${106 + i * 5} T440 ${106 + i * 5}`}
-          stroke="#7fb3ff"
+          stroke="#2b6cb0"
           strokeOpacity={0.35 - i * 0.1}
           strokeWidth={1}
           initial={{ pathLength: 0 }}
@@ -42,16 +42,16 @@ export default function Skyline({ className = "" }: { className?: string }) {
         />
       ))}
       <motion.circle
-        cx={200} cy={13} r={2.2} fill="#ffd27a"
+        cx={200} cy={13} r={2.2} fill="#c8553d"
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: [0, 1, 0.6, 1], scale: 1 }}
         transition={{ delay: 2.4, duration: 1.6 }}
       />
       <defs>
         <linearGradient id="sky" x1="0" x2="440" y1="0" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#ffd27a" />
-          <stop offset="0.55" stopColor="#ffb08a" />
-          <stop offset="1" stopColor="#9cc4ff" />
+          <stop offset="0" stopColor="#d4a24c" />
+          <stop offset="0.55" stopColor="#c8553d" />
+          <stop offset="1" stopColor="#2b6cb0" />
         </linearGradient>
       </defs>
     </svg>

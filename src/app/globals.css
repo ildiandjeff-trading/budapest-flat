@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f6f3ee;
+  --bg: #f4f6fb;
   --bg-elev: #ffffff;
-  --ink: #16181d;
-  --muted: #6b6f78;
-  --line: #e7e2d9;
-  --accent: #c8553d;      /* paprika */
-  --accent-2: #2b6cb0;    /* Danube */
-  --gold: #d4a24c;
-  --today: #16181d;
+  --ink: #0f1d3a;
+  --muted: #5f6b85;
+  --line: #e2e7f0;
+  --navy: #1b3366;      /* main theme colour */
+  --navy-2: #2e56a6;
+  --accent: #1b3366;
+  --accent-2: #2e56a6;
+  --gold: #c99a3e;
+  --today: #1b3366;
   --today-ink: #ffffff;
 }
 
@@ -21,6 +23,8 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-danube: var(--accent-2);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
   --color-gold: var(--gold);
   --color-today: var(--today);
   --color-today-ink: var(--today-ink);
@@ -59,8 +63,24 @@ body {
   transition: transform .15s, background .15s, opacity .15s;
 }
 .btn:active { transform: scale(.97); }
-.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-primary {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2)); color: #fff;
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--navy) 80%, transparent);
+}
+.btn-primary::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .28) 50%, transparent 70%);
+  transition: transform .7s ease;
+}
+.btn-primary:hover::after { transform: translateX(120%); }
+.btn-ghost:hover { border-color: color-mix(in srgb, var(--navy) 35%, var(--line)); background: color-mix(in srgb, var(--navy) 4%, transparent); }
 .btn-ghost { background: transparent; border: 1px solid var(--line); }
 .btn-danger { background: transparent; color: #d64545; border: 1px solid color-mix(in srgb, #d64545 35%, transparent); }
 }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+@keyframes drift { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(30px,-20px,0) scale(1.08); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton { background: linear-gradient(90deg, var(--bg-elev) 25%, var(--line) 50%, var(--bg-elev) 75%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }

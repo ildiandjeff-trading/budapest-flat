@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Skyline from "@/components/Skyline";
 
@@ -18,6 +18,10 @@ export default function Intro() {
   }, [router]);
 
   const words = useMemo(() => TITLE.split(" "), []);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [4, -4]), { stiffness: 80, damping: 20 });
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-6, 6]), { stiffness: 80, damping: 20 });
 
   const enter = () => {
     setLeaving(true);
@@ -25,17 +29,17 @@ export default function Intro() {
   };
 
   return (
-    <main className="fixed inset-0 overflow-hidden bg-[#fbf3e8] text-ink">
+    <main onPointerMove={(e) => { mx.set(e.clientX / window.innerWidth - 0.5); my.set(e.clientY / window.innerHeight - 0.5); }} style={{ perspective: 1000 }} className="fixed inset-0 overflow-hidden bg-[#f4f6fb] text-navy">
       {/* gradient glow */}
       <motion.div
         className="absolute inset-0"
-        style={{ background: "linear-gradient(180deg, #fdf8f1 0%, #fbeee0 45%, #f6d8c3 80%, #efc4b8 100%)" }}
+        style={{ background: "linear-gradient(180deg, #fbfcfe 0%, #eef2fa 40%, #dfe7f6 75%, #d3def3 100%)" }}
         animate={{ opacity: [0.9, 1, 0.9] }}
         transition={{ duration: 8, repeat: Infinity }}
       />
       <motion.div
         className="absolute left-1/2 top-[62%] h-[50vmax] w-[50vmax] -translate-x-1/2 rounded-full blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(255,190,120,.55), rgba(255,170,130,.15) 45%, transparent 65%)" }}
+        style={{ background: "radial-gradient(circle, rgba(243,210,122,.45), rgba(46,86,166,.12) 45%, transparent 65%)" }}
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 2.5, ease: "easeOut" }}
@@ -43,7 +47,7 @@ export default function Intro() {
       {stars.map((st, i) => (
         <motion.span
           key={i}
-          className="absolute rounded-full bg-[#e8a25c]"
+          className="absolute rounded-full bg-navy-2/40"
           style={{ left: `${st.x}%`, top: `${st.y}%`, width: st.s, height: st.s }}
           animate={{ opacity: [0, 0.7, 0], y: [0, -40] }}
           transition={{ duration: 5 + st.d, repeat: Infinity, delay: st.d }}
@@ -54,12 +58,13 @@ export default function Intro() {
         {!leaving && (
           <motion.div
             key="content"
+            style={{ rotateX: rx, rotateY: ry }}
             className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
             exit={{ opacity: 0, scale: 1.06, filter: "blur(8px)" }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
           >
             <motion.p
-              className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-ink/50"
+              className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-navy/50"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
@@ -85,21 +90,30 @@ export default function Intro() {
                 </span>
               ))}
             </h1>
+            <svg viewBox="0 0 300 20" className="mt-1 h-4 w-56 sm:w-72" aria-hidden>
+              <motion.path
+                d="M5 14 C 80 2, 180 2, 295 10"
+                stroke="#c99a3e" strokeWidth={3} strokeLinecap="round" fill="none"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ delay: 1.5, duration: 0.9, ease: [0.65, 0, 0.35, 1] }}
+              />
+            </svg>
 
             <motion.p
-              className="mt-5 max-w-sm text-base text-ink/65"
+              className="mt-5 max-w-sm text-base text-navy/70"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.6, duration: 1 }}
             >
-              Who&apos;s staying when, and everything you need for a lovely stay by the Danube.
+              Who&apos;s staying when, and everything you need for your stay.
             </motion.p>
 
             <Skyline className="mt-10 w-full max-w-xl" />
 
             <motion.button
               onClick={enter}
-              className="group relative mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full bg-ink px-7 py-3.5 font-semibold text-white shadow-[0_14px_40px_-12px_rgba(200,85,61,.7)]"
+              className="group relative mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-navy to-navy-2 px-7 py-3.5 font-semibold text-white shadow-[0_16px_40px_-12px_rgba(27,51,102,.7)]"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2.4, type: "spring", stiffness: 120 }}

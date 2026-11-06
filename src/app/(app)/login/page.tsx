@@ -25,10 +25,10 @@ export default function Login() {
     <div className="mx-auto mt-8 max-w-sm sm:mt-16">
       <motion.div initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 22 }} className="card p-6 sm:p-8">
         <motion.span initial={{ rotate: -20, scale: 0.6 }} animate={{ rotate: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring" }}
-          className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-accent to-gold text-white shadow-lg">
+          className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-navy to-navy-2 text-white shadow-lg shadow-navy/30">
           <Lock className="h-6 w-6" />
         </motion.span>
-        <h1 className="font-display text-3xl font-semibold">Welcome in</h1>
+        <h1 className="font-display text-3xl font-semibold text-navy">Welcome in</h1>
         <p className="mt-1 text-sm text-muted">Enter the flat password to see the calendar and guest guide.</p>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <div className="relative">

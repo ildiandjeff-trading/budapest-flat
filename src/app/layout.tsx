@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin", "latin-ext"] });
@@ -13,13 +14,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f6f3ee",
+  themeColor: "#f4f6fb",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${fraunces.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${fraunces.variable} antialiased`}><Providers>{children}</Providers></body>
     </html>
   );
 }

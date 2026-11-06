@@ -1,10 +1,10 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   addMonths, differenceInCalendarDays, eachDayOfInterval, endOfMonth, endOfWeek,
   format, isSameMonth, isToday, parseISO, startOfMonth, startOfWeek,
 } from "date-fns";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, animate, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Stay } from "@/lib/types";
 import { toKey } from "@/lib/dates";
@@ -36,6 +36,16 @@ function weekSegments(weekStart: Date, stays: Stay[]): Seg[] {
 
 const GAP = 3; // px gap at a changeover so the two bars read as separate
 
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(value);
+  useEffect(() => {
+    const c = animate(shown, value, { duration: 0.6, ease: "easeOut", onUpdate: (v) => setShown(Math.round(v)) });
+    return () => c.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return <>{shown}</>;
+}
+
 export default function MonthCalendar({
   stays, onDayClick, onStayClick,
 }: { stays: Stay[]; onDayClick: (day: string) => void; onStayClick: (s: Stay) => void }) {
@@ -66,7 +76,7 @@ export default function MonthCalendar({
   }, [month, stays]);
 
   return (
-    <div className="card overflow-hidden p-3 sm:p-5">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 180, damping: 24, delay: 0.05 }} className="card overflow-hidden p-3 sm:p-5">
       <div className="mb-4 flex items-center justify-between px-1">
         <div>
           <AnimatePresence mode="popLayout" initial={false}>
@@ -75,14 +85,20 @@ export default function MonthCalendar({
               {format(month, "MMMM")} <span className="text-muted">{format(month, "yyyy")}</span>
             </motion.h2>
           </AnimatePresence>
-          <p className="text-xs text-muted">{bookedNights} of {format(endOfMonth(month), "d")} nights booked</p>
+          <div className="mt-1 flex items-center gap-2 text-xs text-muted">
+            <span className="relative h-1.5 w-20 overflow-hidden rounded-full bg-line">
+              <motion.span className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-navy to-navy-2"
+                animate={{ width: `${(bookedNights / Number(format(endOfMonth(month), "d"))) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
+            </span>
+            <span><CountUp value={bookedNights} /> of {format(endOfMonth(month), "d")} nights booked</span>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {!isSameMonth(month, new Date()) && (
             <button className="btn btn-ghost !px-3 !py-1.5 text-xs" onClick={() => { setDir(month < new Date() ? 1 : -1); setMonth(startOfMonth(new Date())); }}>Today</button>
           )}
-          <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-bg" onClick={() => go(-1)} aria-label="Previous month"><ChevronLeft className="h-5 w-5" /></button>
-          <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-bg" onClick={() => go(1)} aria-label="Next month"><ChevronRight className="h-5 w-5" /></button>
+          <motion.button whileHover={{ scale: 1.1, x: -2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(-1)} aria-label="Previous month"><ChevronLeft className="h-5 w-5" /></motion.button>
+          <motion.button whileHover={{ scale: 1.1, x: 2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(1)} aria-label="Next month"><ChevronRight className="h-5 w-5" /></motion.button>
         </div>
       </div>
 
@@ -105,11 +121,11 @@ export default function MonthCalendar({
             onDragEnd={(_, i) => { if (i.offset.x < -60) go(1); else if (i.offset.x > 60) go(-1); }}
             className="space-y-px overflow-hidden rounded-2xl border border-line bg-line"
           >
-            {weeks.map((week) => {
+            {weeks.map((week, wi) => {
               const segs = weekSegments(week[0], sorted);
               const hidden = segs.filter((s) => s.lane >= MAX_LANES);
               return (
-                <div key={toKey(week[0])} className="relative grid grid-cols-7 gap-px">
+                <motion.div key={toKey(week[0])} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 * wi, duration: 0.35, ease: "easeOut" }} className="relative grid grid-cols-7 gap-px">
                   {week.map((day) => {
                     const inMonth = isSameMonth(day, month);
                     const today = isToday(day);
@@ -118,10 +134,11 @@ export default function MonthCalendar({
                       <button
                         key={toKey(day)}
                         onClick={() => onDayClick(toKey(day))}
-                        className={`relative flex h-[96px] flex-col items-start justify-start bg-elev p-1.5 text-left transition-colors hover:bg-bg sm:h-[112px] ${inMonth ? "" : "bg-bg/60 text-muted/50"}`}
+                        className={`group relative flex h-[96px] flex-col items-start justify-start bg-elev p-1.5 text-left transition-colors hover:bg-navy/[0.03] sm:h-[112px] ${inMonth ? "" : "bg-bg/60 text-muted/50"}`}
                       >
-                        <span className={`inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-xs font-semibold ${today ? "bg-today text-today-ink" : ""}`}>
-                          {format(day, "d")}
+                        <span className={`relative inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-xs font-semibold ${today ? "bg-today text-today-ink shadow-md shadow-navy/40" : "group-hover:text-navy"}`}>
+                          {today && <motion.span aria-hidden className="absolute inset-0 rounded-full bg-navy" animate={{ scale: [1, 1.7], opacity: [0.45, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }} />}
+                          <span className="relative">{format(day, "d")}</span>
                         </span>
                         {more > 0 && <span className="absolute bottom-1 right-1.5 text-[10px] font-medium text-muted">+{more}</span>}
                       </button>
@@ -138,7 +155,8 @@ export default function MonthCalendar({
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 260, damping: 26, delay: 0.05 + s.from * 0.01 }}
-                        whileHover={{ y: -1 }}
+                        whileHover={{ y: -2, scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
                         title={s.stay.guest_name}
                         className="absolute z-10 h-[22px] origin-left truncate px-2 text-left text-[11px] font-semibold leading-[22px] text-white shadow-sm ring-2 ring-elev"
                         style={{
@@ -153,12 +171,12 @@ export default function MonthCalendar({
                       </motion.button>
                     );
                   })}
-                </div>
+                </motion.div>
               );
             })}
           </motion.div>
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }

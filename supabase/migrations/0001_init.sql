@@ -5,7 +5,8 @@ create or replace function public.is_member() returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.members where lower(email) = lower(auth.jwt() ->> 'email'));
 $$;
-revoke execute on function public.is_member() from anon;
+revoke execute on function public.is_member() from public, anon;
+grant execute on function public.is_member() to authenticated;
 
 create table public.stays (
   id uuid primary key default gen_random_uuid(),

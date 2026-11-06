@@ -1,38 +1,40 @@
 "use client";
 import { useMemo, useState } from "react";
 import {
-  addDays, addMonths, differenceInCalendarDays, eachDayOfInterval, endOfMonth, endOfWeek,
-  format, isSameMonth, isToday, max as maxD, min as minD, parseISO, startOfMonth, startOfWeek,
+  addMonths, differenceInCalendarDays, eachDayOfInterval, endOfMonth, endOfWeek,
+  format, isSameMonth, isToday, parseISO, startOfMonth, startOfWeek,
 } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Stay } from "@/lib/types";
-import { lastNight, toKey } from "@/lib/dates";
+import { toKey } from "@/lib/dates";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MAX_LANES = 3;
 
-type Seg = { stay: Stay; col: number; span: number; lane: number; startsHere: boolean; endsHere: boolean };
+// Positions are in half-day units (0..14 per week). A stay starts halfway through its
+// check-in day and ends halfway through its check-out day, so back-to-back stays meet
+// cleanly in the middle of the changeover day instead of sitting side by side.
+type Seg = { stay: Stay; from: number; to: number; lane: number; startsHere: boolean; endsHere: boolean };
 
 function weekSegments(weekStart: Date, stays: Stay[]): Seg[] {
-  const weekEnd = addDays(weekStart, 6);
   const segs: Seg[] = [];
   const laneEnds: number[] = [];
   for (const stay of stays) {
-    const a = parseISO(stay.start_date);
-    const b = lastNight(stay);
-    if (b < weekStart || a > weekEnd || b < a) continue;
-    const s = maxD([a, weekStart]);
-    const e = minD([b, weekEnd]);
-    const col = differenceInCalendarDays(s, weekStart);
-    const span = differenceInCalendarDays(e, s) + 1;
-    let lane = laneEnds.findIndex((end) => end < col);
+    const a = differenceInCalendarDays(parseISO(stay.start_date), weekStart) * 2 + 1;
+    const b = differenceInCalendarDays(parseISO(stay.end_date), weekStart) * 2 + 1;
+    if (b <= 0 || a >= 14 || b <= a) continue;
+    const from = Math.max(a, 0);
+    const to = Math.min(b, 14);
+    let lane = laneEnds.findIndex((end) => end <= from);
     if (lane === -1) { lane = laneEnds.length; laneEnds.push(0); }
-    laneEnds[lane] = col + span - 1;
-    segs.push({ stay, col, span, lane, startsHere: s.getTime() === a.getTime(), endsHere: e.getTime() === b.getTime() });
+    laneEnds[lane] = to;
+    segs.push({ stay, from, to, lane, startsHere: a >= 0, endsHere: b <= 14 });
   }
   return segs;
 }
+
+const GAP = 3; // px gap at a changeover so the two bars read as separate
 
 export default function MonthCalendar({
   stays, onDayClick, onStayClick,
@@ -111,12 +113,12 @@ export default function MonthCalendar({
                   {week.map((day) => {
                     const inMonth = isSameMonth(day, month);
                     const today = isToday(day);
-                    const more = hidden.filter((h) => { const c = differenceInCalendarDays(day, week[0]); return c >= h.col && c < h.col + h.span; }).length;
+                    const more = hidden.filter((h) => { const c = differenceInCalendarDays(day, week[0]) * 2; return c + 2 > h.from && c < h.to; }).length;
                     return (
                       <button
                         key={toKey(day)}
                         onClick={() => onDayClick(toKey(day))}
-                        className={`relative flex h-[88px] flex-col items-start justify-start bg-elev p-1.5 text-left transition-colors hover:bg-bg sm:h-[104px] ${inMonth ? "" : "bg-bg/60 text-muted/50"}`}
+                        className={`relative flex h-[96px] flex-col items-start justify-start bg-elev p-1.5 text-left transition-colors hover:bg-bg sm:h-[112px] ${inMonth ? "" : "bg-bg/60 text-muted/50"}`}
                       >
                         <span className={`inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-xs font-semibold ${today ? "bg-today text-today-ink" : ""}`}>
                           {format(day, "d")}
@@ -125,26 +127,32 @@ export default function MonthCalendar({
                       </button>
                     );
                   })}
-                  {segs.filter((s) => s.lane < MAX_LANES).map((s) => (
-                    <motion.button
-                      key={s.stay.id}
-                      onClick={(e) => { e.stopPropagation(); onStayClick(s.stay); }}
-                      initial={{ scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 260, damping: 26, delay: 0.05 + s.col * 0.02 }}
-                      whileHover={{ y: -1 }}
-                      className="absolute z-10 h-[20px] origin-left truncate px-2 text-left text-[11px] font-semibold leading-[20px] text-white shadow-sm"
-                      style={{
-                        background: s.stay.color,
-                        top: 32 + s.lane * 23,
-                        left: `calc(${(s.col / 7) * 100}% + ${s.startsHere ? 4 : 0}px)`,
-                        width: `calc(${(s.span / 7) * 100}% - ${(s.startsHere ? 4 : 0) + (s.endsHere ? 4 : 0)}px)`,
-                        borderRadius: `${s.startsHere ? 999 : 0}px ${s.endsHere ? 999 : 0}px ${s.endsHere ? 999 : 0}px ${s.startsHere ? 999 : 0}px`,
-                      }}
-                    >
-                      {(s.startsHere || s.col === 0) && s.stay.guest_name}
-                    </motion.button>
-                  ))}
+                  {segs.filter((s) => s.lane < MAX_LANES).map((s) => {
+                    const left = s.startsHere ? GAP : 0;
+                    const right = s.endsHere ? GAP : 0;
+                    const showLabel = (s.startsHere || s.from === 0) && s.to - s.from >= 2;
+                    return (
+                      <motion.button
+                        key={s.stay.id}
+                        onClick={(e) => { e.stopPropagation(); onStayClick(s.stay); }}
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        animate={{ scaleX: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 26, delay: 0.05 + s.from * 0.01 }}
+                        whileHover={{ y: -1 }}
+                        title={s.stay.guest_name}
+                        className="absolute z-10 h-[22px] origin-left truncate px-2 text-left text-[11px] font-semibold leading-[22px] text-white shadow-sm ring-2 ring-elev"
+                        style={{
+                          background: s.stay.color,
+                          top: 34 + s.lane * 26,
+                          left: `calc(${(s.from / 14) * 100}% + ${left}px)`,
+                          width: `calc(${((s.to - s.from) / 14) * 100}% - ${left + right}px)`,
+                          borderRadius: `${s.startsHere ? 999 : 0}px ${s.endsHere ? 999 : 0}px ${s.endsHere ? 999 : 0}px ${s.startsHere ? 999 : 0}px`,
+                        }}
+                      >
+                        {showLabel && s.stay.guest_name}
+                      </motion.button>
+                    );
+                  })}
                 </div>
               );
             })}

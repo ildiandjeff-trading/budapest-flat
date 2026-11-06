@@ -1,4 +1,4 @@
-# Jildi's Budapest Flat
+# Jildi's Budapest Nest
 
 A web-first app to track who's staying at the flat and give guests everything they need.
 

@@ -6,7 +6,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] 
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  title: "Jildi's Budapest Flat",
+  title: "Jildi's Budapest Nest",
   description: "Who's staying when, and everything guests need to know.",
 };
 

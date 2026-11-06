@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Skyline from "@/components/Skyline";
 
-const TITLE = "Jildi's Budapest Flat";
+const TITLE = "Jildi's Budapest Nest";
 
 export default function Intro() {
   const router = useRouter();

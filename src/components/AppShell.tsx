@@ -37,7 +37,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-accent to-gold text-sm font-bold text-white shadow-md">
               BP
             </span>
-            <span className="truncate font-display text-base font-semibold sm:text-lg">Jildi&apos;s Budapest Flat</span>
+            <span className="truncate font-display text-base font-semibold sm:text-lg">Jildi&apos;s Budapest Nest</span>
           </Link>
 
           {!locked && <nav className="hidden items-center gap-1 rounded-full border border-line bg-elev p-1 sm:flex">

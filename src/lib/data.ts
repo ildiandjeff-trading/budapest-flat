@@ -121,7 +121,7 @@ export function useGuide() {
   return { sections, loading, refresh };
 }
 
-/** Owners can edit when signed in. In demo mode (no Supabase configured) everyone can edit locally. */
+/** Everyone signs in with the one shared password. In demo mode (no Supabase configured) no sign-in is needed. */
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(isDemo);

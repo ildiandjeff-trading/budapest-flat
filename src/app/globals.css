@@ -13,21 +13,6 @@
   --today-ink: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1015;
-    --bg-elev: #171a21;
-    --ink: #eef0f3;
-    --muted: #9095a1;
-    --line: #262a33;
-    --accent: #e8735a;
-    --accent-2: #5b9bea;
-    --gold: #e2b766;
-    --today: #eef0f3;
-    --today-ink: #0e1015;
-  }
-}
-
 @theme inline {
   --color-bg: var(--bg);
   --color-elev: var(--bg-elev);

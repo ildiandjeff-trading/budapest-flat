@@ -109,7 +109,7 @@ export default function Intro() {
               Who&apos;s staying when, and everything you need for your stay.
             </motion.p>
 
-            <Skyline className="mt-10 w-full max-w-xl" />
+            <Skyline className="mt-8 w-[calc(100%+3rem)] max-w-2xl sm:mt-10 sm:w-full" />
 
             <motion.button
               onClick={enter}

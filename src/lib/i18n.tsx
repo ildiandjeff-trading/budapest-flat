@@ -23,6 +23,8 @@ const en = {
   "optional": "(optional)",
   "err.save": "Could not save",
   "err.delete": "Could not delete",
+  "err.load": "Couldn't load this. Check your connection and refresh the page.",
+  "close": "Close",
 
   // intro
   "intro.sub": "Who's staying when, and everything you need for your stay.",
@@ -84,6 +86,7 @@ const en = {
   "guide.fText": "Text",
   "guide.help": "Start a line with “- ” for a bullet, “## ” for a small heading, “! ” for a warning box. Links: [Name](https://…). The ✓ list icon makes a tick-off checklist at the bottom.",
   "guide.huFallback": "Leave the Hungarian empty to show the English text.",
+  "guide.mismatch": "Heads up: the English version has {en} bullet points and the Hungarian has {hu}. Update both so every guest sees the same list.",
   "check.kicker": "Before you go",
   "check.done": "done",
   "check.allDone": "All done, thank you! Safe travels and we hope to see you again. 💛",
@@ -157,6 +160,8 @@ const hu: Record<TKey, string> = {
   "optional": "(nem kötelező)",
   "err.save": "Nem sikerült menteni",
   "err.delete": "Nem sikerült törölni",
+  "err.load": "Nem sikerült betölteni. Ellenőrizd a kapcsolatot, és frissítsd az oldalt.",
+  "close": "Bezárás",
 
   "intro.sub": "Ki mikor lakik itt, és minden, amire szükséged lesz itt-tartózkodásod alatt.",
   "intro.enter": "Gyere be",
@@ -213,6 +218,7 @@ const hu: Record<TKey, string> = {
   "guide.fText": "Szöveg",
   "guide.help": "„- ” a sor elején: felsorolás, „## ”: kis alcím, „! ”: figyelmeztető doboz. Hivatkozás: [Név](https://…). A ✓ lista ikon kipipálható listát készít az oldal aljára.",
   "guide.huFallback": "Ha a magyar mező üres, az angol szöveg jelenik meg.",
+  "guide.mismatch": "Figyelem: az angol változatban {en}, a magyarban {hu} felsoroláspont van. Frissítsd mindkettőt, hogy minden vendég ugyanazt lássa.",
   "check.kicker": "Indulás előtt",
   "check.done": "kész",
   "check.allDone": "Minden kész, köszönjük! Jó utat, reméljük, hamarosan újra találkozunk! 💛",

@@ -2,8 +2,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
 
 export default function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
+  const { t } = useI18n();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -34,7 +36,7 @@ export default function Sheet({ open, onClose, title, children }: { open: boolea
             <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line sm:hidden" />
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-display text-2xl font-semibold">{title}</h2>
-              <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-bg" aria-label="Close"><X className="h-5 w-5" /></button>
+              <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-bg" aria-label={t("close")}><X className="h-5 w-5" /></button>
             </div>
             {children}
           </motion.div>

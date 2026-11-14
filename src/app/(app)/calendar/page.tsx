@@ -45,7 +45,7 @@ export default function CalendarPage() {
         )}
       </div>
 
-      {error && <p className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-500">{error}</p>}
+      {error && <p className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-500">{t("err.load")}</p>}
 
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="order-2 lg:order-1">

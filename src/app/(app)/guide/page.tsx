@@ -11,6 +11,8 @@ import { pick, useI18n, type Lang } from "@/lib/i18n";
 
 const ICONS: Record<string, LucideIcon> = { key: Key, wifi: Wifi, flame: Flame, utensils: Utensils, trash: Trash2, tram: TramFront, heart: Heart, phone: Phone, bed: BedDouble, info: Info, map: MapPin, car: Car, alert: TriangleAlert, checklist: ListChecks };
 
+const countBullets = (s?: string | null) => (s ?? "").split("\n").filter((l) => /^\s*[-•*]\s+/.test(l)).length;
+
 /** A section with this icon is the checkout list: shown open at the bottom with tick boxes. */
 const CHECKLIST_ICON = "checklist";
 
@@ -220,6 +222,12 @@ export default function GuidePage() {
               ))}
             </div>
             {editLang === "hu" && <p className="-mt-2 text-xs text-muted">{t("guide.huFallback")}</p>}
+            {!!edit.body_hu?.trim() && countBullets(edit.body) !== countBullets(edit.body_hu) && (
+              <p className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
+                <TriangleAlert className="h-4 w-4 shrink-0 text-amber-600" />
+                {t("guide.mismatch", { en: countBullets(edit.body), hu: countBullets(edit.body_hu) })}
+              </p>
+            )}
             <label className="block"><span className="mb-1.5 block text-sm font-medium">{t("guide.fTitle")}</span>
               {editLang === "en"
                 ? <input className="input" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} />

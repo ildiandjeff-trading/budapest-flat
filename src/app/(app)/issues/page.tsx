@@ -110,7 +110,7 @@ export default function IssuesPage() {
         ))}
       </div>
 
-      {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{t("err.load")}</p>}
 
       {loading ? (
         <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="card skeleton h-24" />)}</div>

@@ -95,7 +95,8 @@ export async function fetchIssues(): Promise<Issue[]> {
   return data as Issue[];
 }
 
-export async function saveIssue(issue: IssueInput): Promise<void> {
+/** Saves an issue. Returns the new issue's id when one was created. */
+export async function saveIssue(issue: IssueInput): Promise<string | void> {
   const resolved_at = issue.status === "resolved" ? new Date().toISOString() : null;
   if (!supabase) {
     const all = lsGet<Issue[]>(LS_ISSUES, []);
@@ -106,11 +107,25 @@ export async function saveIssue(issue: IssueInput): Promise<void> {
     return;
   }
   const { id, ...rest } = issue;
-  const q = id
-    ? supabase.from("issues").update({ ...rest, resolved_at }).eq("id", id)
-    : supabase.from("issues").insert({ ...rest, resolved_at });
-  const { error } = await q;
+  if (id) {
+    const { error } = await supabase.from("issues").update({ ...rest, resolved_at }).eq("id", id);
+    if (error) throw error;
+    return;
+  }
+  const { data, error } = await supabase.from("issues").insert({ ...rest, resolved_at }).select("id").single();
   if (error) throw error;
+  return data.id as string;
+}
+
+/** Emails the hosts about a new issue (via the notify-issue function). Never throws. */
+export async function notifyHosts(issueId: string): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase.functions.invoke("notify-issue", { body: { id: issueId, appUrl: window.location.origin } });
+    return !error && !!data?.sent;
+  } catch {
+    return false;
+  }
 }
 
 export async function deleteIssue(id: string): Promise<void> {

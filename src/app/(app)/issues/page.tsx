@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CircleCheck, Clock, Hammer, MapPin, Pencil, Plus, Siren, Trash2, User, Wrench } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Sheet from "@/components/Sheet";
-import { deleteIssue, saveIssue, useIssues, type IssueInput } from "@/lib/data";
+import { deleteIssue, notifyHosts, saveIssue, useIssues, type IssueInput } from "@/lib/data";
 import type { Issue, IssueStatus, IssueUrgency } from "@/lib/types";
 
 const AREAS = ["Kitchen", "Bathroom", "Toilet", "Bedroom", "Living room", "Heating & water", "Wi-Fi & TV", "Windows & shades", "Other"];
@@ -30,7 +30,7 @@ export default function IssuesPage() {
   const [edit, setEdit] = useState<IssueInput | null>(null);
   const [busy, setBusy] = useState(false);
   const [filter, setFilter] = useState<Filter>("active");
-  const [justSent, setJustSent] = useState(false);
+  const [justSent, setJustSent] = useState<null | "saved" | "emailed">(null);
 
   const counts = useMemo(() => ({
     active: issues.filter((i) => i.status !== "resolved").length,
@@ -44,10 +44,15 @@ export default function IssuesPage() {
     setBusy(true);
     try {
       const isNew = !edit.id;
-      await saveIssue({ ...edit, title: edit.title.trim(), details: edit.details?.trim() || null, reported_by: edit.reported_by?.trim() || null });
+      const newId = await saveIssue({ ...edit, title: edit.title.trim(), details: edit.details?.trim() || null, reported_by: edit.reported_by?.trim() || null });
       await refresh();
       setEdit(null);
-      if (isNew) { setFilter("active"); setJustSent(true); setTimeout(() => setJustSent(false), 5000); }
+      if (isNew) {
+        setFilter("active");
+        setJustSent("saved");
+        if (newId) notifyHosts(newId).then((ok) => ok && setJustSent("emailed"));
+        setTimeout(() => setJustSent(null), 6000);
+      }
     } finally { setBusy(false); }
   };
   const remove = async () => {
@@ -88,7 +93,7 @@ export default function IssuesPage() {
         {justSent && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             className="mb-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900">
-            <CircleCheck className="h-5 w-5 text-emerald-600" /> Thanks! Your report is saved and the hosts can see it here.
+            <CircleCheck className="h-5 w-5 text-emerald-600" /> {justSent === "emailed" ? "Thanks! Your report is saved and the hosts have been emailed." : "Thanks! Your report is saved and the hosts can see it here."}
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,18 +5,35 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, CalendarDays, LogOut, Wrench } from "lucide-react";
 import { useAuth, useIssues } from "@/lib/data";
+import { useI18n, type Lang, type TKey } from "@/lib/i18n";
+import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
 
-const tabs = [
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/guide", label: "Guest guide", icon: BookOpen },
-  { href: "/issues", label: "Report issue", icon: Wrench },
+const tabs: { href: string; label: TKey; icon: typeof CalendarDays }[] = [
+  { href: "/calendar", label: "nav.calendar", icon: CalendarDays },
+  { href: "/guide", label: "nav.guide", icon: BookOpen },
+  { href: "/issues", label: "nav.issues", icon: Wrench },
 ];
+
+function LangSwitch() {
+  const { lang, setLang, t } = useI18n();
+  return (
+    <div role="group" aria-label={t("lang.switch")} className="relative flex shrink-0 items-center rounded-full border border-line bg-elev p-0.5 text-[11px] font-bold">
+      {(["en", "hu"] as Lang[]).map((l) => (
+        <button key={l} type="button" onClick={() => setLang(l)} aria-pressed={lang === l} className="relative rounded-full px-2.5 py-1">
+          {lang === l && <motion.span layoutId="lang-pill" className="absolute inset-0 rounded-full bg-navy" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
+          <span className={`relative z-10 ${lang === l ? "text-white" : "text-muted"}`}>{l === "en" ? "EN" : "HU"}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const { session, ready, isDemo } = useAuth();
+  const { t } = useI18n();
   const onLogin = path.startsWith("/login");
   const locked = !isDemo && !session;
   const { issues } = useIssues(!locked && ready);
@@ -48,27 +65,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="group flex min-w-0 items-center gap-2.5">
-            <motion.span
-              whileHover={{ rotate: -8, scale: 1.08 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-navy to-navy-2 text-sm font-bold text-white shadow-md shadow-navy/30"
-            >
-              JB
-            </motion.span>
+            <Logo className="h-9 w-9" />
             <span className="truncate font-display text-base font-semibold sm:text-lg">Jildi&apos;s Budapest Nest</span>
           </Link>
 
           {!locked && <nav className="hidden items-center gap-1 rounded-full border border-line bg-elev p-1 sm:flex">
-            {tabs.map((t) => {
-              const active = path.startsWith(t.href);
+            {tabs.map((tab) => {
+              const active = path.startsWith(tab.href);
               return (
-                <Link key={t.href} href={t.href} className="relative rounded-full px-4 py-1.5 text-sm font-medium">
+                <Link key={tab.href} href={tab.href} className="relative rounded-full px-4 py-1.5 text-sm font-medium">
                   {active && (
                     <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-gradient-to-r from-navy to-navy-2" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
                   )}
                   <span className={`relative z-10 inline-flex items-center gap-1.5 ${active ? "text-white" : "text-muted hover:text-ink"}`}>
-                    {t.label}
-                    {t.href === "/issues" && openIssues > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">{openIssues}</span>}
+                    {t(tab.label)}
+                    {tab.href === "/issues" && openIssues > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">{openIssues}</span>}
                   </span>
                 </Link>
               );
@@ -76,11 +87,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </nav>}
 
           <div className="flex items-center gap-2">
+            <LangSwitch />
             {isDemo ? (
-              <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-gold">Demo mode</span>
+              <span className="hidden rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-gold sm:inline">{t("demoMode")}</span>
             ) : session ? (
-              <button className="btn btn-ghost shrink-0 !px-3 !py-1.5 text-xs" onClick={() => supabase?.auth.signOut()}>
-                <LogOut className="h-3.5 w-3.5" /> Sign out
+              <button className="btn btn-ghost shrink-0 !px-2.5 !py-1.5 text-xs" onClick={() => supabase?.auth.signOut()} aria-label={t("signOut")} title={t("signOut")}>
+                <LogOut className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("signOut")}</span>
               </button>
             ) : null}
           </div>
@@ -92,12 +104,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile tab bar */}
       {!locked && <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:hidden">
         <div className="grid h-16 grid-cols-3 gap-1 rounded-[1.4rem] border border-line/80 bg-elev/95 p-1 shadow-[0_-6px_30px_-8px_rgb(15_29_58/0.25)] backdrop-blur-xl">
-          {tabs.map((t) => {
-            const active = path.startsWith(t.href);
-            const Icon = t.icon;
-            const badge = t.href === "/issues" ? openIssues : 0;
+          {tabs.map((tab) => {
+            const active = path.startsWith(tab.href);
+            const Icon = tab.icon;
+            const badge = tab.href === "/issues" ? openIssues : 0;
             return (
-              <Link key={t.href} href={t.href} aria-current={active ? "page" : undefined} className="relative flex flex-col items-center justify-center gap-0.5 rounded-[1.1rem] text-[11px] font-semibold leading-tight">
+              <Link key={tab.href} href={tab.href} aria-current={active ? "page" : undefined} className="relative flex flex-col items-center justify-center gap-0.5 rounded-[1.1rem] text-[11px] font-semibold leading-tight">
                 {active && (
                   <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-[1.1rem] bg-navy/[0.07]" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
                 )}
@@ -111,7 +123,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <span className="absolute -right-2 -top-1.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-white">{badge}</span>
                   )}
                 </motion.span>
-                <span className={`relative ${active ? "text-navy" : "text-muted"}`}>{t.label}</span>
+                <span className={`relative ${active ? "text-navy" : "text-muted"}`}>{t(tab.label)}</span>
               </Link>
             );
           })}

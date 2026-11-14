@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Skyline from "@/components/Skyline";
+import { useI18n } from "@/lib/i18n";
 
 const TITLE = "Jildi's Budapest Nest";
 
 export default function Intro() {
   const router = useRouter();
+  const { t } = useI18n();
   const [leaving, setLeaving] = useState(false);
   const [stars, setStars] = useState<{ x: number; y: number; s: number; d: number }[]>([]);
 
@@ -106,7 +108,7 @@ export default function Intro() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.6, duration: 1 }}
             >
-              Who&apos;s staying when, and everything you need for your stay.
+              {t("intro.sub")}
             </motion.p>
 
             <Skyline className="mt-8 w-[calc(100%+3rem)] max-w-2xl sm:mt-10 sm:w-full" />
@@ -120,7 +122,7 @@ export default function Intro() {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
             >
-              <span className="relative z-10">Come on in</span>
+              <span className="relative z-10">{t("intro.enter")}</span>
               <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-1" />
               <motion.span
                 className="absolute inset-y-0 -left-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent"

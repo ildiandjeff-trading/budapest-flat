@@ -8,8 +8,9 @@ import { AnimatePresence, animate, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Stay } from "@/lib/types";
 import { toKey } from "@/lib/dates";
+import { useI18n } from "@/lib/i18n";
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS = { en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], hu: ["H", "K", "Sze", "Cs", "P", "Szo", "V"] };
 const MAX_LANES = 3;
 
 // Positions are in half-day units (0..14 per week). A stay starts halfway through its
@@ -49,6 +50,7 @@ function CountUp({ value }: { value: number }) {
 export default function MonthCalendar({
   stays, onDayClick, onStayClick,
 }: { stays: Stay[]; onDayClick: (day: string) => void; onStayClick: (s: Stay) => void }) {
+  const { t, lang, locale } = useI18n();
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [dir, setDir] = useState(0);
 
@@ -82,7 +84,9 @@ export default function MonthCalendar({
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.h2 key={toKey(month)} className="font-display text-2xl font-semibold sm:text-3xl"
               initial={{ opacity: 0, y: dir * 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -dir * 12 }}>
-              {format(month, "MMMM")} <span className="text-muted">{format(month, "yyyy")}</span>
+              {lang === "hu"
+                ? <><span className="text-muted">{format(month, "yyyy.")}</span> <span className="capitalize">{format(month, "LLLL", { locale })}</span></>
+                : <>{format(month, "MMMM")} <span className="text-muted">{format(month, "yyyy")}</span></>}
             </motion.h2>
           </AnimatePresence>
           <div className="mt-1 flex items-center gap-2 text-xs text-muted">
@@ -90,20 +94,20 @@ export default function MonthCalendar({
               <motion.span className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-navy to-navy-2"
                 animate={{ width: `${(bookedNights / Number(format(endOfMonth(month), "d"))) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
             </span>
-            <span><CountUp value={bookedNights} /> of {format(endOfMonth(month), "d")} nights booked</span>
+            <span>{(() => { const [a, b] = t("cal.booked", { total: format(endOfMonth(month), "d") }).split("{n}"); return <>{a}<CountUp value={bookedNights} />{b}</>; })()}</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
           {!isSameMonth(month, new Date()) && (
-            <button className="btn btn-ghost !px-3 !py-1.5 text-xs" onClick={() => { setDir(month < new Date() ? 1 : -1); setMonth(startOfMonth(new Date())); }}>Today</button>
+            <button className="btn btn-ghost !px-3 !py-1.5 text-xs" onClick={() => { setDir(month < new Date() ? 1 : -1); setMonth(startOfMonth(new Date())); }}>{t("cal.today")}</button>
           )}
-          <motion.button whileHover={{ scale: 1.1, x: -2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(-1)} aria-label="Previous month"><ChevronLeft className="h-5 w-5" /></motion.button>
-          <motion.button whileHover={{ scale: 1.1, x: 2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(1)} aria-label="Next month"><ChevronRight className="h-5 w-5" /></motion.button>
+          <motion.button whileHover={{ scale: 1.1, x: -2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(-1)} aria-label={t("cal.prev")}><ChevronLeft className="h-5 w-5" /></motion.button>
+          <motion.button whileHover={{ scale: 1.1, x: 2 }} whileTap={{ scale: 0.9 }} className="grid h-9 w-9 place-items-center rounded-full text-navy hover:bg-navy/5" onClick={() => go(1)} aria-label={t("cal.next")}><ChevronRight className="h-5 w-5" /></motion.button>
         </div>
       </div>
 
       <div className="grid grid-cols-7 px-0.5 pb-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted">
-        {WEEKDAYS.map((w) => <div key={w}>{w.slice(0, 3)}</div>)}
+        {WEEKDAYS[lang].map((w) => <div key={w}>{w}</div>)}
       </div>
 
       <div className="relative overflow-hidden">

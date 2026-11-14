@@ -7,6 +7,7 @@ import {
 import Sheet from "@/components/Sheet";
 import { deleteSection, saveSection, useAuth, useGuide } from "@/lib/data";
 import type { GuideSection } from "@/lib/types";
+import { pick, useI18n, type Lang } from "@/lib/i18n";
 
 const ICONS: Record<string, LucideIcon> = { key: Key, wifi: Wifi, flame: Flame, utensils: Utensils, trash: Trash2, tram: TramFront, heart: Heart, phone: Phone, bed: BedDouble, info: Info, map: MapPin, car: Car, alert: TriangleAlert, checklist: ListChecks };
 
@@ -58,18 +59,22 @@ function Body({ text }: { text: string }) {
 
 /** The checkout list: always open, full width, each bullet is a tick box (saved on this device). */
 function Checklist({ section, canEdit, onEdit, delay }: { section: GuideSection; canEdit: boolean; onEdit: () => void; delay: number }) {
-  const lines = section.body.split("\n").filter((l) => l.trim());
+  const { t, lang } = useI18n();
+  const lines = pick(lang, section.body, section.body_hu).split("\n").filter((l) => l.trim());
   const intro = lines.filter((l) => !/^\s*[-•*]\s+/.test(l));
   const items = lines.filter((l) => /^\s*[-•*]\s+/.test(l)).map((l) => l.replace(/^\s*[-•*]\s+/, ""));
-  // Key on the item text so editing the list doesn't leave stale ticks behind.
+  // Ticks are stored by position so they carry over when switching language.
   const key = `bf_checkout_${section.id}`;
-  const [done, setDone] = useState<string[]>([]);
+  const [done, setDone] = useState<number[]>([]);
   useEffect(() => {
-    try { const v = localStorage.getItem(key); if (v) setDone(JSON.parse(v)); } catch {}
+    try {
+      const v = localStorage.getItem(key);
+      if (v) setDone((JSON.parse(v) as unknown[]).filter((x): x is number => typeof x === "number"));
+    } catch {}
   }, [key]);
-  const persist = (next: string[]) => { setDone(next); try { localStorage.setItem(key, JSON.stringify(next)); } catch {} };
-  const toggle = (item: string) => persist(done.includes(item) ? done.filter((d) => d !== item) : [...done, item]);
-  const count = items.filter((i) => done.includes(i)).length;
+  const persist = (next: number[]) => { setDone(next); try { localStorage.setItem(key, JSON.stringify(next)); } catch {} };
+  const toggle = (idx: number) => persist(done.includes(idx) ? done.filter((d) => d !== idx) : [...done, idx]);
+  const count = items.filter((_, idx) => done.includes(idx)).length;
   const all = items.length > 0 && count === items.length;
 
   return (
@@ -78,12 +83,12 @@ function Checklist({ section, canEdit, onEdit, delay }: { section: GuideSection;
       <div className="flex items-center gap-4 bg-gradient-to-br from-navy to-navy-2 px-5 py-5 text-white sm:px-7">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15"><ListChecks className="h-6 w-6" /></span>
         <div className="flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/60">Before you go</p>
-          <h2 className="font-display text-2xl font-semibold sm:text-3xl">{section.title}</h2>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/60">{t("check.kicker")}</p>
+          <h2 className="font-display text-2xl font-semibold sm:text-3xl">{pick(lang, section.title, section.title_hu)}</h2>
         </div>
         <div className="text-right">
           <p className="font-display text-2xl font-semibold">{count}<span className="text-white/50">/{items.length}</span></p>
-          <p className="text-xs text-white/60">done</p>
+          <p className="text-xs text-white/60">{t("check.done")}</p>
         </div>
       </div>
       <div className="h-1.5 bg-navy/10">
@@ -92,11 +97,11 @@ function Checklist({ section, canEdit, onEdit, delay }: { section: GuideSection;
       <div className="px-5 pb-6 pt-5 sm:px-7">
         {intro.length > 0 && <div className="mb-4 space-y-2 text-[15px] text-muted">{intro.map((l, i) => <p key={i}><Inline text={l} /></p>)}</div>}
         <ul className="space-y-2.5">
-          {items.map((item) => {
-            const on = done.includes(item);
+          {items.map((item, idx) => {
+            const on = done.includes(idx);
             return (
-              <li key={item}>
-                <button type="button" onClick={() => toggle(item)} aria-pressed={on}
+              <li key={idx}>
+                <button type="button" onClick={() => toggle(idx)} aria-pressed={on}
                   className={`flex w-full items-center gap-4 rounded-2xl border px-4 py-3.5 text-left text-[15px] transition ${on ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-line bg-bg hover:border-navy/30"}`}>
                   <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border-2 transition ${on ? "border-emerald-500 bg-emerald-500 text-white" : "border-navy/30 bg-white"}`}>
                     <AnimatePresence>{on && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Check className="h-4 w-4" strokeWidth={3} /></motion.span>}</AnimatePresence>
@@ -110,15 +115,15 @@ function Checklist({ section, canEdit, onEdit, delay }: { section: GuideSection;
         <AnimatePresence>
           {all && (
             <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-5 rounded-2xl bg-gold/15 px-4 py-3 text-center font-semibold text-ink">
-              All done, thank you! Safe travels and we hope to see you again. 💛
+              {t("check.allDone")}
             </motion.p>
           )}
         </AnimatePresence>
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <p className="text-xs text-muted">Ticks are saved on this phone only.</p>
+        <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted">{t("check.local")}</p>
           <div className="flex gap-2">
-            {count > 0 && <button className="btn btn-ghost !py-1.5 text-xs" onClick={() => persist([])}><RotateCcw className="h-3.5 w-3.5" /> Reset</button>}
-            {canEdit && <button className="btn btn-ghost !py-1.5 text-xs" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /> Edit</button>}
+            {count > 0 && <button className="btn btn-ghost !py-1.5 text-xs" onClick={() => persist([])}><RotateCcw className="h-3.5 w-3.5" /> {t("reset")}</button>}
+            {canEdit && <button className="btn btn-ghost !py-1.5 text-xs" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /> {t("edit")}</button>}
           </div>
         </div>
       </div>
@@ -131,6 +136,8 @@ export default function GuidePage() {
   const sections = allSections.filter((s) => s.icon !== CHECKLIST_ICON);
   const checklists = allSections.filter((s) => s.icon === CHECKLIST_ICON);
   const { canEdit } = useAuth();
+  const { t, lang } = useI18n();
+  const [editLang, setEditLang] = useState<Lang>("en");
   const [openId, setOpenId] = useState<string | null>(null);
   const [edit, setEdit] = useState<(Omit<GuideSection, "id"> & { id?: string }) | null>(null);
   const [busy, setBusy] = useState(false);
@@ -152,17 +159,17 @@ export default function GuidePage() {
         <motion.div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-navy-2/60 blur-3xl" animate={{ x: [0, -20, 0], y: [0, 15, 0] }} transition={{ duration: 10, repeat: Infinity }} />
         <motion.div className="absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-[#6f97e0]/40 blur-3xl" animate={{ x: [0, 25, 0] }} transition={{ duration: 12, repeat: Infinity }} />
         <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Guest guide</p>
-          <motion.h1 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, type: "spring", stiffness: 160, damping: 20 }} className="mt-2 font-display text-4xl font-semibold sm:text-5xl">Make yourself at home</motion.h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">{t("guide.kicker")}</p>
+          <motion.h1 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, type: "spring", stiffness: 160, damping: 20 }} className="mt-2 font-display text-4xl font-semibold sm:text-5xl">{t("guide.title")}</motion.h1>
           <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-3 h-1 w-20 origin-left rounded-full bg-gold" />
-          <p className="mt-3 max-w-lg text-white/80">Everything you need for your stay: getting in, Wi-Fi, how things work, and our favourite spots nearby.</p>
+          <p className="mt-3 max-w-lg text-white/80">{t("guide.sub")}</p>
         </div>
       </motion.div>
 
       {canEdit && (
         <div className="mb-4 flex justify-end">
-          <button className="btn btn-ghost text-sm" onClick={() => setEdit({ title: "", icon: "info", body: "", position: allSections.length })}>
-            <Plus className="h-4 w-4" /> Add section
+          <button className="btn btn-ghost text-sm" onClick={() => { setEditLang(lang); setEdit({ title: "", icon: "info", body: "", title_hu: "", body_hu: "", position: allSections.length }); }}>
+            <Plus className="h-4 w-4" /> {t("guide.add")}
           </button>
         </div>
       )}
@@ -178,16 +185,16 @@ export default function GuidePage() {
               <motion.div key={s.id} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.05, type: "spring", stiffness: 220, damping: 24 }} whileHover={{ y: -3 }} className="card overflow-hidden transition-shadow hover:shadow-lg hover:shadow-navy/10">
                 <button className="group flex w-full items-center gap-4 p-4 text-left" onClick={() => setOpenId(open ? null : s.id)}>
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-navy/10 text-navy transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"><Icon className="h-5 w-5" /></span>
-                  <span className="flex-1 font-semibold">{s.title}</span>
+                  <span className="flex-1 font-semibold">{pick(lang, s.title, s.title_hu)}</span>
                   <motion.span animate={{ rotate: open ? 180 : 0 }}><ChevronDown className="h-5 w-5 text-muted" /></motion.span>
                 </button>
                 <AnimatePresence initial={false}>
                   {open && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}>
                       <div className="border-t border-line px-5 pb-5 pt-4">
-                        <Body text={s.body} />
+                        <Body text={pick(lang, s.body, s.body_hu)} />
                         {canEdit && (
-                          <button className="btn btn-ghost mt-4 !py-1.5 text-xs" onClick={() => setEdit(s)}><Pencil className="h-3.5 w-3.5" /> Edit</button>
+                          <button className="btn btn-ghost mt-4 !py-1.5 text-xs" onClick={() => { setEditLang(lang); setEdit(s); }}><Pencil className="h-3.5 w-3.5" /> {t("edit")}</button>
                         )}
                       </div>
                     </motion.div>
@@ -200,27 +207,38 @@ export default function GuidePage() {
       )}
 
       {!loading && checklists.map((c, i) => (
-        <Checklist key={c.id} section={c} canEdit={canEdit} onEdit={() => setEdit(c)} delay={0.2 + (sections.length + i) * 0.05} />
+        <Checklist key={c.id} section={c} canEdit={canEdit} onEdit={() => { setEditLang(lang); setEdit(c); }} delay={0.2 + (sections.length + i) * 0.05} />
       ))}
 
-      <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? "Edit section" : "New section"}>
+      <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? t("guide.editSection") : t("guide.newSection")}>
         {edit && (
           <div className="space-y-4">
-            <label className="block"><span className="mb-1.5 block text-sm font-medium">Title</span>
-              <input className="input" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></label>
-            <div><span className="mb-1.5 block text-sm font-medium">Icon</span>
+            <div className="inline-flex rounded-full border border-line bg-bg p-1 text-sm font-semibold">
+              {(["en", "hu"] as Lang[]).map((l) => (
+                <button key={l} type="button" onClick={() => setEditLang(l)}
+                  className={`rounded-full px-4 py-1.5 transition ${editLang === l ? "bg-navy text-white" : "text-muted"}`}>{l === "en" ? "English" : "Magyar"}</button>
+              ))}
+            </div>
+            {editLang === "hu" && <p className="-mt-2 text-xs text-muted">{t("guide.huFallback")}</p>}
+            <label className="block"><span className="mb-1.5 block text-sm font-medium">{t("guide.fTitle")}</span>
+              {editLang === "en"
+                ? <input className="input" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} />
+                : <input className="input" value={edit.title_hu ?? ""} placeholder={edit.title} onChange={(e) => setEdit({ ...edit, title_hu: e.target.value })} />}</label>
+            <div><span className="mb-1.5 block text-sm font-medium">{t("guide.fIcon")}</span>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(ICONS).map(([k, I]) => (
                   <button key={k} type="button" onClick={() => setEdit({ ...edit, icon: k })}
                     className={`grid h-10 w-10 place-items-center rounded-xl border transition ${edit.icon === k ? "border-navy bg-navy/10 text-navy" : "border-line text-muted"}`}><I className="h-5 w-5" /></button>
                 ))}
               </div></div>
-            <label className="block"><span className="mb-1.5 block text-sm font-medium">Text</span>
-              <textarea className="input min-h-48 font-mono text-sm" value={edit.body} onChange={(e) => setEdit({ ...edit, body: e.target.value })} />
-              <span className="mt-1 block text-xs text-muted">Start a line with “- ” for a bullet, “## ” for a small heading, “! ” for a warning box. Links: [Name](https://…). The ✓ list icon makes a tick-off checklist at the bottom.</span></label>
+            <label className="block"><span className="mb-1.5 block text-sm font-medium">{t("guide.fText")}</span>
+              {editLang === "en"
+                ? <textarea className="input min-h-48 font-mono text-sm" value={edit.body} onChange={(e) => setEdit({ ...edit, body: e.target.value })} />
+                : <textarea className="input min-h-48 font-mono text-sm" value={edit.body_hu ?? ""} onChange={(e) => setEdit({ ...edit, body_hu: e.target.value })} />}
+              <span className="mt-1 block text-xs text-muted">{t("guide.help")}</span></label>
             <div className="flex items-center justify-between pt-2">
-              {edit.id ? <button className="btn btn-danger" disabled={busy} onClick={remove}><Trash2 className="h-4 w-4" /> Delete</button> : <span />}
-              <button className="btn btn-primary" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</button>
+              {edit.id ? <button className="btn btn-danger" disabled={busy} onClick={remove}><Trash2 className="h-4 w-4" /> {t("delete")}</button> : <span />}
+              <button className="btn btn-primary" disabled={busy} onClick={save}>{busy ? t("saving") : t("save")}</button>
             </div>
           </div>
         )}

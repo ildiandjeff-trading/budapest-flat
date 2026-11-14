@@ -70,7 +70,8 @@ export async function saveSection(sec: Omit<GuideSection, "id"> & { id?: string 
     lsSet(LS_GUIDE, next);
     return;
   }
-  const { id, ...rest } = sec;
+  const { id, ...fields } = sec;
+  const rest = { ...fields, title_hu: fields.title_hu?.trim() || null, body_hu: fields.body_hu?.trim() || null };
   const q = id ? supabase.from("guide_sections").update(rest).eq("id", id) : supabase.from("guide_sections").insert(rest);
   const { error } = await q;
   if (error) throw error;

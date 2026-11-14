@@ -14,6 +14,8 @@ export type GuideSection = {
   icon: string;
   body: string;
   position: number;
+  title_hu?: string | null;
+  body_hu?: string | null;
 };
 
 export type IssueStatus = "open" | "in_progress" | "resolved";

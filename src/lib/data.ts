@@ -3,10 +3,11 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase, isDemo } from "./supabase";
 import { DEFAULT_GUIDE, DEMO_STAYS } from "./defaults";
-import type { GuideSection, Stay } from "./types";
+import type { GuideSection, Issue, Stay } from "./types";
 
 const LS_STAYS = "bf_demo_stays";
 const LS_GUIDE = "bf_demo_guide";
+const LS_ISSUES = "bf_demo_issues";
 
 function lsGet<T>(k: string, fallback: T): T {
   try {
@@ -84,6 +85,43 @@ export async function deleteSection(id: string): Promise<void> {
   if (error) throw error;
 }
 
+// ---------- Issues ----------
+export type IssueInput = Omit<Issue, "id" | "created_at" | "resolved_at"> & { id?: string };
+
+export async function fetchIssues(): Promise<Issue[]> {
+  if (!supabase) return lsGet<Issue[]>(LS_ISSUES, []).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const { data, error } = await supabase.from("issues").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return data as Issue[];
+}
+
+export async function saveIssue(issue: IssueInput): Promise<void> {
+  const resolved_at = issue.status === "resolved" ? new Date().toISOString() : null;
+  if (!supabase) {
+    const all = lsGet<Issue[]>(LS_ISSUES, []);
+    const next = issue.id
+      ? all.map((i) => (i.id === issue.id ? { ...i, ...issue, resolved_at: issue.status === "resolved" ? i.resolved_at ?? resolved_at : null } as Issue : i))
+      : [...all, { ...issue, id: uid(), created_at: new Date().toISOString(), resolved_at } as Issue];
+    lsSet(LS_ISSUES, next);
+    return;
+  }
+  const { id, ...rest } = issue;
+  const q = id
+    ? supabase.from("issues").update({ ...rest, resolved_at }).eq("id", id)
+    : supabase.from("issues").insert({ ...rest, resolved_at });
+  const { error } = await q;
+  if (error) throw error;
+}
+
+export async function deleteIssue(id: string): Promise<void> {
+  if (!supabase) {
+    lsSet(LS_ISSUES, lsGet<Issue[]>(LS_ISSUES, []).filter((i) => i.id !== id));
+    return;
+  }
+  const { error } = await supabase.from("issues").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // ---------- Hooks ----------
 export function useStays() {
   const [stays, setStays] = useState<Stay[]>([]);
@@ -119,6 +157,33 @@ export function useGuide() {
   }, []);
   useEffect(() => { refresh(); }, [refresh]);
   return { sections, loading, refresh };
+}
+
+export function useIssues(enabled = true) {
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const refresh = useCallback(async () => {
+    try {
+      setIssues(await fetchIssues());
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load issues");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    if (!enabled) return;
+    refresh();
+    if (!supabase) return;
+    const ch = supabase
+      .channel(`issues-${Math.random().toString(36).slice(2, 8)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "issues" }, () => refresh())
+      .subscribe();
+    return () => { supabase?.removeChannel(ch); };
+  }, [refresh, enabled]);
+  return { issues, loading, error, refresh };
 }
 
 /** Everyone signs in with the one shared password. In demo mode (no Supabase configured) no sign-in is needed. */

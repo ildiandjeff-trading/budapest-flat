@@ -9,6 +9,8 @@ const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin", "lat
 export const metadata: Metadata = {
   title: "Jildi's Budapest Nest",
   description: "Who's staying when, and everything guests need to know.",
+  // iPhone "Add to Home Screen": open full-screen with this name under the icon
+  appleWebApp: { capable: true, title: "Jildi's Nest", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

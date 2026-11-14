@@ -103,7 +103,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile tab bar */}
       {!locked && <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:hidden">
-        <div className="grid h-16 grid-cols-3 gap-1 rounded-[1.4rem] border border-line/80 bg-elev/95 p-1 shadow-[0_-6px_30px_-8px_rgb(15_29_58/0.25)] backdrop-blur-xl">
+        <div className="grid h-16 grid-cols-3 gap-1 rounded-[1.4rem] border border-white/60 bg-elev/65 p-1 shadow-[0_-6px_30px_-8px_rgb(15_29_58/0.25)] backdrop-blur-xl backdrop-saturate-150">
           {tabs.map((tab) => {
             const active = path.startsWith(tab.href);
             const Icon = tab.icon;

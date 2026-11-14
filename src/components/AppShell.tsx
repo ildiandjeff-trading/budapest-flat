@@ -33,7 +33,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-dvh pb-32 sm:pb-10">
+    <div className="relative min-h-dvh pb-28 sm:pb-10">
       {/* soft drifting background glows */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-[#9db8ea]/25 blur-3xl" style={{ animation: "drift 18s ease-in-out infinite" }} />
@@ -90,25 +90,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">{children}</main>
 
       {/* Mobile tab bar */}
-      {!locked && <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:hidden">
-        <div className="grid grid-cols-3 gap-1 rounded-[1.6rem] border border-line/80 bg-elev/95 p-1.5 shadow-[0_-6px_30px_-8px_rgb(15_29_58/0.25)] backdrop-blur-xl">
+      {!locked && <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:hidden">
+        <div className="grid h-16 grid-cols-3 gap-1 rounded-[1.4rem] border border-line/80 bg-elev/95 p-1 shadow-[0_-6px_30px_-8px_rgb(15_29_58/0.25)] backdrop-blur-xl">
           {tabs.map((t) => {
             const active = path.startsWith(t.href);
             const Icon = t.icon;
             const badge = t.href === "/issues" ? openIssues : 0;
             return (
-              <Link key={t.href} href={t.href} aria-current={active ? "page" : undefined} className="relative flex flex-col items-center gap-1 rounded-[1.2rem] py-2 text-[11px] font-semibold">
+              <Link key={t.href} href={t.href} aria-current={active ? "page" : undefined} className="relative flex flex-col items-center justify-center gap-0.5 rounded-[1.1rem] text-[11px] font-semibold leading-tight">
                 {active && (
-                  <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-[1.2rem] bg-navy/[0.07]" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
+                  <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-[1.1rem] bg-navy/[0.07]" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
                 )}
                 <motion.span
-                  animate={{ scale: active ? 1.08 : 1, y: active ? -1 : 0 }}
+                  animate={{ scale: active ? 1.06 : 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  className={`relative grid h-10 w-12 place-items-center rounded-2xl transition-colors ${active ? "bg-gradient-to-br from-navy to-navy-2 text-white shadow-lg shadow-navy/35" : "bg-navy/[0.06] text-navy/70"}`}
+                  className={`relative grid h-8 w-11 place-items-center rounded-xl transition-colors ${active ? "bg-gradient-to-br from-navy to-navy-2 text-white shadow-lg shadow-navy/35" : "bg-navy/[0.06] text-navy/70"}`}
                 >
-                  <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 2} />
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
                   {badge > 0 && (
-                    <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-white">{badge}</span>
+                    <span className="absolute -right-2 -top-1.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-white">{badge}</span>
                   )}
                 </motion.span>
                 <span className={`relative ${active ? "text-navy" : "text-muted"}`}>{t.label}</span>

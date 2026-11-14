@@ -162,7 +162,7 @@ export default function IssuesPage() {
         {edit && (
           <div className="space-y-5">
             <label className="block"><span className="mb-1.5 block text-sm font-medium">{t("iss.what")}</span>
-              <input className="input" autoFocus placeholder={t("iss.whatPh")} value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></label>
+              <input className="input" data-autofocus placeholder={t("iss.whatPh")} value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></label>
             <div><span className="mb-2 block text-sm font-medium">{t("iss.where")}</span>
               <div className="flex flex-wrap gap-2">
                 {AREAS.map((a) => (

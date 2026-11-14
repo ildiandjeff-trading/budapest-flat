@@ -62,7 +62,7 @@ export default function StayDialog({
       <div className="space-y-4">
         <label className="block">
           <span className="mb-1.5 block text-sm font-medium">{t("stay.who")}</span>
-          <input autoFocus={!d.id} className="input" placeholder={t("stay.whoPh")} value={d.guest_name} onChange={(e) => set("guest_name", e.target.value)} />
+          <input data-autofocus={!d.id ? "" : undefined} className="input" placeholder={t("stay.whoPh")} value={d.guest_name} onChange={(e) => set("guest_name", e.target.value)} />
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">

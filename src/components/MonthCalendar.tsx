@@ -142,7 +142,7 @@ export default function MonthCalendar({
                         className={`group relative flex h-[96px] flex-col items-start justify-start p-1.5 text-left transition-colors sm:h-[112px] ${
                           inMonth
                             ? weekend ? "bg-weekend hover:bg-gold/15" : "bg-elev hover:bg-navy/[0.03]"
-                            : "bg-bg/60 text-muted/50"
+                            : "bg-bg text-muted/30 [&>span]:font-medium"
                         }`}
                       >
                         <span className={`relative inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-xs font-semibold ${today ? "bg-today text-today-ink shadow-md shadow-navy/40" : "group-hover:text-navy"}`}>

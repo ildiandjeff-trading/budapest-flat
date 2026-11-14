@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   addMonths, differenceInCalendarDays, eachDayOfInterval, endOfMonth, endOfWeek,
-  format, isSameMonth, isToday, parseISO, startOfMonth, startOfWeek,
+  format, isSameMonth, isToday, isWeekend, parseISO, startOfMonth, startOfWeek,
 } from "date-fns";
 import { AnimatePresence, animate, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -107,7 +107,7 @@ export default function MonthCalendar({
       </div>
 
       <div className="grid grid-cols-7 px-0.5 pb-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted">
-        {WEEKDAYS[lang].map((w) => <div key={w}>{w}</div>)}
+        {WEEKDAYS[lang].map((w, i) => <div key={w} className={i >= 5 ? "text-gold" : ""}>{w}</div>)}
       </div>
 
       <div className="relative overflow-hidden">
@@ -133,12 +133,17 @@ export default function MonthCalendar({
                   {week.map((day) => {
                     const inMonth = isSameMonth(day, month);
                     const today = isToday(day);
+                    const weekend = isWeekend(day);
                     const more = hidden.filter((h) => { const c = differenceInCalendarDays(day, week[0]) * 2; return c + 2 > h.from && c < h.to; }).length;
                     return (
                       <button
                         key={toKey(day)}
                         onClick={() => onDayClick(toKey(day))}
-                        className={`group relative flex h-[96px] flex-col items-start justify-start bg-elev p-1.5 text-left transition-colors hover:bg-navy/[0.03] sm:h-[112px] ${inMonth ? "" : "bg-bg/60 text-muted/50"}`}
+                        className={`group relative flex h-[96px] flex-col items-start justify-start p-1.5 text-left transition-colors sm:h-[112px] ${
+                          inMonth
+                            ? weekend ? "bg-weekend hover:bg-gold/15" : "bg-elev hover:bg-navy/[0.03]"
+                            : "bg-bg/60 text-muted/50"
+                        }`}
                       >
                         <span className={`relative inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-xs font-semibold ${today ? "bg-today text-today-ink shadow-md shadow-navy/40" : "group-hover:text-navy"}`}>
                           {today && <motion.span aria-hidden className="absolute inset-0 rounded-full bg-navy" animate={{ scale: [1, 1.7], opacity: [0.45, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }} />}

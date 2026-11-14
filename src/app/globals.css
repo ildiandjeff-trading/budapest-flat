@@ -13,6 +13,7 @@
   --gold: #c99a3e;
   --today: #1b3366;
   --today-ink: #ffffff;
+  --weekend: #fbf6ea;   /* light shade for Saturdays and Sundays in the calendar */
 }
 
 @theme inline {
@@ -28,6 +29,7 @@
   --color-gold: var(--gold);
   --color-today: var(--today);
   --color-today-ink: var(--today-ink);
+  --color-weekend: var(--weekend);
   --font-sans: var(--font-inter);
   --font-display: var(--font-fraunces);
 }

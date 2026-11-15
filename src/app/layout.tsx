@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Who's staying when, and everything guests need to know.",
   // iPhone "Add to Home Screen": open full-screen with this name under the icon
   appleWebApp: { capable: true, title: "Jildi's Nest", statusBarStyle: "default" },
+  // Friends-only site: ask search engines not to list it (next.config.ts sends the same as a header)
+  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
 };
 
 export const viewport: Viewport = {
